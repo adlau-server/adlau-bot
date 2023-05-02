@@ -12,59 +12,12 @@ class Noun {
         this.preference = preference;
     }
 
-    generateDecoratedForm() {
-        const useAdjectives = Math.random() > 0.5;
-
-        let preference = this.preference == "none"
-            ? pickRandom(["article" as const, "general" as const])
-            : this.preference;
-
-        switch (preference) {
-            case "general": {
-                if (useAdjectives) {
-                    const adjective = pickRandom(adjectives);
-
-                    switch (adjective.positionPreference) {
-                        case "before": return `${adjective.generalForm} ${this.generalForm}`;
-                        case "after": return `${this.generalForm} ${adjective.generalForm}`;
-                    }
-                }
-
-                return this.generalForm;
-            }
-            case "article": {
-                if (useAdjectives) {
-                    const adjective = pickRandom(adjectives);
-
-                    switch (adjective.positionPreference) {
-                        case "before": return `${adjective.articleForm} ${this.generalForm}`;
-                        case "after": return `${this.articleForm} ${adjective.generalForm}`;
-                    }
-                }
-
-                return this.generalForm;
-            }
-        }
-    }
-
     getPreferredForm() {
         switch (this.preference) {
             case "general": return this.generalForm;
             case "article": return this.articleForm;
             case "none": return pickRandom([this.generalForm, this.articleForm]);
         }
-    }
-}
-
-class Adjective {
-    readonly generalForm: string;
-    readonly articleForm: string;
-    readonly positionPreference: "before" | "after";
-
-    constructor(generalForm: string, articleForm: string, positionPreference: "before" | "after") {
-        this.generalForm = generalForm;
-        this.articleForm = articleForm;
-        this.positionPreference = positionPreference;
     }
 }
 
@@ -99,10 +52,10 @@ class Verb {
         const object = this.getLinkage();
 
         if (object instanceof Verb && this.canUseWould && Math.random() > 0.5) {
-            return `would ${this.conjugated} ${object.infinitive} ${pickRandom(nouns).generateDecoratedForm()}`;
+            return `would ${this.conjugated} ${object.infinitive} ${pickRandom(nouns).getPreferredForm()}`;
         }
 
-        return `${this.conjugated} ${pickRandom(nouns).generateDecoratedForm()}`;
+        return `${this.conjugated} ${pickRandom(nouns).getPreferredForm()}`;
     }
 }
 
@@ -132,11 +85,6 @@ const nouns = [
         new Verb("to want", "want", true, true),
         new Verb("to need", "need", true, true),
         new Verb("to desire", "desire", false, false),
-    ],
-    adjectives = [
-        new Adjective("trans", "a trans", "before"),
-        new Adjective("gay", "a gay", "before"),
-        new Adjective("furry", "a furry", "before"),
     ];
 
 function pickRandom<T>(arr: T[]) {

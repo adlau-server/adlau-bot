@@ -114,29 +114,31 @@ export const LoggingTypes = Object.freeze({
     Warning: augment((...content: any[]) => console.warn(Chalk.yellowBright(content))),
 });
 
-export function tryAndExitOnFailure<T>(cb: () => T, errorMessage: string) {
+function handleFailure(e: unknown, errorMessage: string, failureCallback?: (e: unknown) => void): never {
+    LoggingTypes.FatalError(errorMessage);
+    console.error(e);
+    process.exitCode = 1;
+    failureCallback?.(e);
+    throw "";
+}
+
+export function tryAndExitOnFailure<T>(cb: () => T, errorMessage: string, failureCallback?: (e: unknown) => void) {
     try {
         return cb();
     } catch (e) {
-        LoggingTypes.FatalError(errorMessage);
-        console.error(e);
-        process.exitCode = 1;
-        throw "";
+        handleFailure(e, errorMessage, failureCallback);
     }
 }
 
-export async function tryAndExitOnFailureAsync<T>(cb: () => Promise<T>, errorMessage: string) {
+export async function tryAndExitOnFailureAsync<T>(cb: () => Promise<T>, errorMessage: string, failureCallback?: (e: unknown) => void) {
     try {
         return await cb();
     } catch (e) {
-        LoggingTypes.FatalError(errorMessage);
-        console.error(e);
-        process.exitCode = 1;
-        throw "";
+        handleFailure(e, errorMessage, failureCallback);
     }
 }
 
-export const BOT_VERSION = new SemVer(0, 2, 0);
+export const BOT_VERSION = new SemVer(0, 3, 0);
 export const CONFIG: Readonly<{
     readonly verboseLogging: boolean,
     readonly clientId: import("discord.js").Snowflake,

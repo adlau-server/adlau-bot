@@ -1,5 +1,5 @@
 import { Client, If, Collection, SlashCommandBuilder, ChatInputCommandInteraction, version, APIVersion, GatewayIntentBits, Events } from "discord.js";
-import { LoggingTypes, tryAndExitOnFailure, Chalk, BOT_VERSION } from "./util.js";
+import { LoggingTypes, tryAndExitOnFailure, Chalk, BOT_VERSION, tryAndExitOnFailureAsync } from "./util.js";
 import deployCommands from "./deploy.js";
 
 export type AugmentedClient<B extends boolean = boolean> = Client<B> & {
@@ -45,7 +45,7 @@ function createClient() {
 }
 
 async function login(client: AugmentedClient<true>) {
-    return await tryAndExitOnFailure(
+    return await tryAndExitOnFailureAsync(
         async () => {
             LoggingTypes.Info(`Attempting to login…`);
             await client.login(process.env.DISCORD_TOKEN);
@@ -53,7 +53,7 @@ async function login(client: AugmentedClient<true>) {
             LoggingTypes.Info(`adlau bot v${BOT_VERSION} is now running`);
             return client;
         },
-        `There was an error while logging in:`
+        `There was an error while logging in:`,
     );
 }
 
